@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow/Diffusion ImageNet Tracker</title>
+    <link rel="stylesheet" href="assets/styles.css?v=20260520-layout" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" role="img">
+          <path d="M8 32c9 0 8-16 16-16s7 16 16 16" />
+          <path d="M8 16c9 0 8 16 16 16s7-16 16-16" />
+          <circle cx="8" cy="32" r="3" />
+          <circle cx="40" cy="16" r="3" />
+        </svg>
+      </div>
+      <div>
+        <p class="eyebrow">Flow/Diffusion Research Tracker</p>
+        <h1>ImageNet-256 Generation Board</h1>
+      </div>
+      <nav class="top-links" aria-label="Repository links">
+        <a href="prompts/daily-update-agent.md">Daily Agent</a>
+        <a href="key-word-list.md">Keyword List</a>
+        <a href="docs/roadmap.md">Roadmap</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="stats-band" aria-label="Data summary">
+        <div class="stat"><span class="stat-value" id="statMethods">--</span><span class="stat-label">Unique Methods</span></div>
+        <div class="stat"><span class="stat-value" id="statRows">--</span><span class="stat-label">Total Rows</span></div>
+        <div class="stat"><span class="stat-value" id="statBestUncond">--</span><span class="stat-label">Best FID (uncond)</span></div>
+        <div class="stat"><span class="stat-value" id="statBestCond">--</span><span class="stat-label">Best FID (cond)</span></div>
+        <div class="stat"><span class="stat-value" id="statDateRange">--</span><span class="stat-label">Date Range</span></div>
+      </section>
+
+      <section class="timeline-section" aria-labelledby="timeline-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Progress Over Time</p>
+            <h2 id="timeline-title">FID Rows And Breakthrough Milestones</h2>
+          </div>
+          <div class="timeline-actions">
+            <div class="timeline-controls" role="group" aria-label="FID trend view">
+              <button class="timeline-toggle is-active" data-trend="all" type="button">All</button>
+              <button class="timeline-toggle" data-trend="unguided" type="button">Unconditional</button>
+              <button class="timeline-toggle" data-trend="guided" type="button">Conditional</button>
+            </div>
+            <div class="zoom-controls" role="group" aria-label="Timeline zoom">
+              <button class="zoom-button" data-zoom="out" type="button" aria-label="Zoom out" title="Zoom out">-</button>
+              <button class="zoom-button" data-zoom="reset" type="button" aria-label="Reset zoom" title="Reset zoom">Reset</button>
+              <button class="zoom-button" data-zoom="in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-card">
+          <svg id="fidTimeline" viewBox="0 0 900 390" role="img" aria-labelledby="timeline-title timeline-desc">
+            <text x="450" y="195" text-anchor="middle" class="tick-label">Loading timeline data…</text>
+          </svg>
+          <div id="timelineTooltip" class="timeline-tooltip" hidden></div>
+        </div>
+        <p id="timeline-desc" class="chart-note">Lower is better. Every point is a reported leaderboard row; the line and labels mark cumulative best-FID breakthroughs.</p>
+      </section>
+
+      <section class="tool-band" aria-label="Leaderboard controls">
+        <div class="search-wrap">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m21 21-4.3-4.3" />
+            <circle cx="11" cy="11" r="7" />
+          </svg>
+          <input id="searchInput" type="search" placeholder="Search methods, backbones, notes" />
+        </div>
+
+        <label>
+          Family
+          <select id="familyFilter">
+            <option value="">All</option>
+          </select>
+        </label>
+
+        <label>
+          Backbone
+          <select id="backboneFilter">
+            <option value="">All</option>
+          </select>
+        </label>
+
+        <label>
+          Training
+          <select id="trainingFilter">
+            <option value="">All</option>
+          </select>
+        </label>
+
+        <div class="segment-group" role="group" aria-label="Leaderboard view">
+          <button class="segment is-active" data-view="all" type="button">All</button>
+          <button class="segment" data-view="unguided" type="button">Unconditional</button>
+          <button class="segment" data-view="guided" type="button">Conditional</button>
+          <button class="segment" data-view="rae" type="button">RAE</button>
+          <button class="segment" data-view="ditxl" type="button">DiT-XL</button>
+          <button class="segment" data-view="sitxl" type="button">SiT-XL</button>
+        </div>
+      </section>
+
+      <section class="leaderboard-section" aria-labelledby="leaderboard-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Leaderboard</p>
+            <h2 id="leaderboard-title">ImageNet-256 Results</h2>
+          </div>
+          <p id="rowCount" class="row-count">--</p>
+        </div>
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th data-sort="method">Method</th>
+                <th data-sort="backbone">Backbone</th>
+                <th data-sort="latent">Latent</th>
+                <th data-sort="guidance">Condition</th>
+                <th data-sort="fid">FID</th>
+                <th data-sort="is">IS</th>
+                <th data-sort="precision">Precision</th>
+                <th data-sort="recall">Recall</th>
+                <th data-sort="epochs">Epochs</th>
+                <th data-sort="training">Training</th>
+                <th>Source</th>
+                <th>TL;DR</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+              <tr>
+                <td colspan="12" class="loading-cell">Loading leaderboard data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="source-panel benchmark-section" aria-labelledby="benchmark-title">
+        <h2 id="benchmark-title">Benchmark Scope</h2>
+        <ul>
+          <li>ImageNet-1k 256x256 class-conditional generation.</li>
+          <li>FID-like metrics are preserved as reported: FID, gFID, or FID-50k.</li>
+          <li>Conditional and unconditional rows are intentionally separate.</li>
+          <li>DiT-XL and SiT-XL are separate leaderboard slices.</li>
+        </ul>
+      </section>
+
+      <section class="content-grid" aria-label="Tracker content">
+        <article class="info-card">
+          <p class="eyebrow">Discovery</p>
+          <h2>Keyword Map</h2>
+          <div class="chip-group">
+            <span>flow matching</span>
+            <span>rectified flow</span>
+            <span>stochastic interpolants</span>
+            <span>diffusion transformer</span>
+            <span>DiT-XL</span>
+            <span>SiT-XL</span>
+            <span>RAE</span>
+            <span>ImageNet-256</span>
+            <span>FID</span>
+            <span>NFE</span>
+          </div>
+          <a class="file-link" href="key-word-list.md">Open keyword list</a>
+        </article>
+
+        <article class="info-card">
+          <p class="eyebrow">Prompts</p>
+          <h2>Agent Stack</h2>
+          <ul class="file-list">
+            <li><a href="prompts/daily-update-agent.md">daily-update-agent.md</a></li>
+            <li><a href="prompts/classify-paper-from-abstract.md">classify-paper-from-abstract.md</a></li>
+            <li><a href="prompts/extract-paper-information.md">extract-paper-information.md</a></li>
+          </ul>
+        </article>
+
+        <article class="info-card">
+          <p class="eyebrow">Workflow</p>
+          <h2>Roadmap</h2>
+          <ol class="phase-list">
+            <li>arXiv discovery after 2026-01-01</li>
+            <li>abstract classification</li>
+            <li>full-paper extraction</li>
+            <li>leaderboard update</li>
+            <li>daily report</li>
+          </ol>
+          <a class="file-link" href="docs/roadmap.md">Open roadmap</a>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>Flow/Diffusion ImageNet tracker</span>
+      <a href="data/imagenet-256-leaderboard.csv">Download CSV</a>
+    </footer>
+
+    <script src="assets/app.js?v=20260520-tldr"></script>
+  </body>
+</html>
