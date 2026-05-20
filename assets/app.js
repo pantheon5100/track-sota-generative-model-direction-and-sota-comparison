@@ -13,7 +13,8 @@ const state = {
     search: "",
     family: "",
     backbone: "",
-    training: ""
+    training: "",
+    latent: ""
   }
 };
 
@@ -22,6 +23,7 @@ const els = {
   familyFilter: document.querySelector("#familyFilter"),
   backboneFilter: document.querySelector("#backboneFilter"),
   trainingFilter: document.querySelector("#trainingFilter"),
+  latentFilter: document.querySelector("#latentFilter"),
   segments: document.querySelectorAll(".segment"),
   timelineToggles: document.querySelectorAll(".timeline-toggle"),
   zoomButtons: document.querySelectorAll(".zoom-button"),
@@ -40,6 +42,8 @@ const els = {
 
 const SORT_KEYS = {
   method: { get: (r) => r.method.toLowerCase(), numeric: false },
+  paper: { get: (r) => (r.paper_title || "").toLowerCase(), numeric: false },
+  date: { get: (r) => r.submitted_date || "", numeric: false },
   backbone: { get: (r) => `${r.backbone_family}-${r.backbone_size}`.toLowerCase(), numeric: false },
   latent: { get: (r) => (r.latent_or_pixel || "").toLowerCase(), numeric: false },
   guidance: { get: (r) => guidanceLabel(r.guidance), numeric: false },
@@ -67,6 +71,7 @@ function readUrlState() {
   if (params.has("family")) state.filters.family = params.get("family");
   if (params.has("backbone")) state.filters.backbone = params.get("backbone");
   if (params.has("training")) state.filters.training = params.get("training");
+  if (params.has("latent")) state.filters.latent = params.get("latent");
   if (params.has("sort")) state.sort.key = params.get("sort");
   if (params.has("dir")) state.sort.dir = params.get("dir");
 }
@@ -79,6 +84,7 @@ function writeUrlState() {
   if (state.filters.family) params.set("family", state.filters.family);
   if (state.filters.backbone) params.set("backbone", state.filters.backbone);
   if (state.filters.training) params.set("training", state.filters.training);
+  if (state.filters.latent) params.set("latent", state.filters.latent);
   if (state.sort.key !== "fid") params.set("sort", state.sort.key);
   if (state.sort.dir !== "asc") params.set("dir", state.sort.dir);
   const qs = params.toString();
@@ -90,6 +96,7 @@ function syncUiFromState() {
   els.familyFilter.value = state.filters.family;
   els.backboneFilter.value = state.filters.backbone;
   els.trainingFilter.value = state.filters.training;
+  els.latentFilter.value = state.filters.latent;
   els.segments.forEach((s) => s.classList.toggle("is-active", s.dataset.view === state.view));
   els.timelineToggles.forEach((t) => t.classList.toggle("is-active", t.dataset.trend === state.trend));
 }
@@ -157,6 +164,7 @@ function rowSearchText(row) {
   return [
     row.method,
     row.method_variant,
+    row.paper_title,
     row.method_family,
     row.backbone_family,
     row.backbone_size,
@@ -217,6 +225,7 @@ function applyFilters() {
       if (state.filters.family && row.method_family !== state.filters.family) return false;
       if (state.filters.backbone && row.backbone_family !== state.filters.backbone) return false;
       if (state.filters.training && row.training_type !== state.filters.training) return false;
+      if (state.filters.latent && row.latent_or_pixel !== state.filters.latent) return false;
       if (search && !rowSearchText(row).includes(search)) return false;
       return true;
     })
@@ -545,6 +554,7 @@ function scrollToTableRow(pointIndex) {
     state.filters.family = "";
     state.filters.backbone = "";
     state.filters.training = "";
+    state.filters.latent = "";
     syncUiFromState();
     render();
     tr = els.body.querySelector(`tr[data-row-index="${rowIndex}"]`);
@@ -579,7 +589,7 @@ function renderTable() {
   els.rowCount.textContent = `${rows.length} visible rows`;
 
   if (!rows.length) {
-    els.body.innerHTML = '<tr><td colspan="12" class="empty-cell">No rows match the current filters.</td></tr>';
+    els.body.innerHTML = '<tr><td colspan="13" class="empty-cell">No rows match the current filters.</td></tr>';
     return;
   }
 
@@ -596,6 +606,7 @@ function renderTable() {
       return `
         <tr data-row-index="${rowIndex}">
           <td class="method-cell">${methodName}${methodVariant}</td>
+          <td class="date-cell">${escapeHtml(row.submitted_date ? formatDateLabel(row.submitted_date) : "--")}</td>
           <td>${escapeHtml(labelValue(backbone))}</td>
           <td>${escapeHtml(labelValue(row.latent_or_pixel).replaceAll("_", " "))}</td>
           <td><span class="${badgeClassForGuidance(row)}">${escapeHtml(guidanceLabel(row.guidance))}</span></td>
@@ -606,7 +617,7 @@ function renderTable() {
           <td>${escapeHtml(row.epochs || "--")}</td>
           <td><span class="badge train">${escapeHtml(labelValue(row.training_type).replaceAll("_", " "))}</span></td>
           <td class="source-cell"><a href="${/^https?:\/\//.test(row.source_url) ? escapeHtml(row.source_url) : "#"}">${escapeHtml(sourceLabel)}</a></td>
-          <td class="tldr-cell">${escapeHtml(rowTldr(row))}</td>
+          <td class="tldr-cell" title="${escapeHtml(row.paper_title || "")}">${escapeHtml(row.paper_title || "--")}</td>
         </tr>
       `;
     })
@@ -626,7 +637,10 @@ function renderStats() {
   els.statBestCond.textContent = bestCond !== null ? bestCond.toFixed(2) : "--";
   const dates = state.rows.map((r) => r.submitted_date).filter(Boolean).sort();
   if (dates.length) {
-    els.statDateRange.textContent = `${formatDateLabel(dates[0])} – ${formatDateLabel(dates[dates.length - 1])}`;
+    const latestDate = formatDateLabel(dates[dates.length - 1]);
+    els.statDateRange.textContent = latestDate;
+    els.statDateRange.title = `Latest paper date: ${latestDate}`;
+    els.statDateRange.setAttribute("aria-label", `Latest paper date: ${latestDate}`);
   }
 }
 
@@ -667,6 +681,11 @@ function bindEvents() {
 
   els.trainingFilter.addEventListener("change", (event) => {
     state.filters.training = event.target.value;
+    render();
+  });
+
+  els.latentFilter.addEventListener("change", (event) => {
+    state.filters.latent = event.target.value;
     render();
   });
 
@@ -724,11 +743,12 @@ async function init() {
     populateSelect(els.familyFilter, optionList(state.rows, "method_family"));
     populateSelect(els.backboneFilter, optionList(state.rows, "backbone_family"));
     populateSelect(els.trainingFilter, optionList(state.rows, "training_type"));
+    populateSelect(els.latentFilter, optionList(state.rows, "latent_or_pixel"));
     syncUiFromState();
     bindEvents();
     render();
   } catch (error) {
-    els.body.innerHTML = `<tr><td colspan="12" class="empty-cell">Could not load ${escapeHtml(DATA_URL)}.</td></tr>`;
+    els.body.innerHTML = `<tr><td colspan="13" class="empty-cell">Could not load ${escapeHtml(DATA_URL)}.</td></tr>`;
     if (els.fidTimeline) {
       els.fidTimeline.innerHTML = `<text x="450" y="195" text-anchor="middle" class="tick-label">Could not load timeline data.</text>`;
     }

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Flow/Diffusion ImageNet Tracker</title>
-    <link rel="stylesheet" href="assets/styles.css?v=20260520-layout" />
+    <link rel="stylesheet" href="assets/styles.css?v=20260520-date-range" />
   </head>
   <body>
     <header class="site-header">
@@ -33,7 +33,7 @@
         <div class="stat"><span class="stat-value" id="statRows">--</span><span class="stat-label">Total Rows</span></div>
         <div class="stat"><span class="stat-value" id="statBestUncond">--</span><span class="stat-label">Best FID (uncond)</span></div>
         <div class="stat"><span class="stat-value" id="statBestCond">--</span><span class="stat-label">Best FID (cond)</span></div>
-        <div class="stat"><span class="stat-value" id="statDateRange">--</span><span class="stat-label">Date Range</span></div>
+        <div class="stat"><span class="stat-value" id="statDateRange">--</span><span class="stat-label">Last Update</span></div>
       </section>
 
       <section class="timeline-section" aria-labelledby="timeline-title">
@@ -94,6 +94,13 @@
           </select>
         </label>
 
+        <label>
+          Latent
+          <select id="latentFilter">
+            <option value="">All</option>
+          </select>
+        </label>
+
         <div class="segment-group" role="group" aria-label="Leaderboard view">
           <button class="segment is-active" data-view="all" type="button">All</button>
           <button class="segment" data-view="unguided" type="button">Unconditional</button>
@@ -117,6 +124,7 @@
             <thead>
               <tr>
                 <th data-sort="method">Method</th>
+                <th data-sort="date">Date</th>
                 <th data-sort="backbone">Backbone</th>
                 <th data-sort="latent">Latent</th>
                 <th data-sort="guidance">Condition</th>
@@ -127,12 +135,12 @@
                 <th data-sort="epochs">Epochs</th>
                 <th data-sort="training">Training</th>
                 <th>Source</th>
-                <th>TL;DR</th>
+                <th data-sort="paper">TL;DR</th>
               </tr>
             </thead>
             <tbody id="leaderboardBody">
               <tr>
-                <td colspan="12" class="loading-cell">Loading leaderboard data...</td>
+                <td colspan="13" class="loading-cell">Loading leaderboard data...</td>
               </tr>
             </tbody>
           </table>
@@ -198,6 +206,6 @@
       <a href="data/imagenet-256-leaderboard.csv">Download CSV</a>
     </footer>
 
-    <script src="assets/app.js?v=20260520-tldr"></script>
+    <script src="assets/app.js?v=20260520-date-range"></script>
   </body>
 </html>
