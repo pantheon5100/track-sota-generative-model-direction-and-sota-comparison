@@ -39,6 +39,7 @@ The dashboard is a zero-build static site served via GitHub Pages. It reads `dat
 
 - Pre-2026 benchmark data is seeded from the RAE-DiT paper and its ImageNet 256x256 comparison table.
 - Automated arXiv discovery searches papers submitted on or after 2026-01-01.
+- Older papers can enter as manual/backfill candidates when they were updated after 2026-01-01, accepted to a 2026 venue, explicitly provided by the user, or reported as important ImageNet-256 methods in newer comparison tables.
 - DiT-XL and SiT-XL results are preserved as separate records when both are reported.
 
 ## Agent Pipeline

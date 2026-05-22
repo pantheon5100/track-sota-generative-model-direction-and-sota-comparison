@@ -20,7 +20,8 @@ Before doing any work, read these files:
 Core policy:
 
 - Pre-2026 benchmark data is seeded from the RAE-DiT paper.
-- Automated arXiv discovery searches papers submitted on or after `2026-01-01`.
+- Automated arXiv discovery searches papers submitted on or after `2026-01-01`, plus older papers whose arXiv versions were updated on or after `2026-01-01`.
+- Important pre-2026 papers can enter as manual/backfill candidates when they report ImageNet-256 FID/gFID/FID-50k, are accepted to a 2026 venue, appear in newer comparison tables, or are explicitly provided by the user.
 - Preserve DiT-XL and SiT-XL results as separate records.
 - Do not overwrite or remove user edits unless the user explicitly asks.
 
@@ -48,10 +49,16 @@ Search arXiv using multiple query groups:
 
 Minimum search filters:
 
-- submitted date: on or after `2026-01-01`
+- submitted date: on or after `2026-01-01`, or updated/revised date in the current search window for older papers
 - preferred arXiv categories: `cs.CV`, `cs.LG`, `stat.ML`
 
 Do not rely on a single query. Broad queries are acceptable because the abstract classifier handles noise.
+
+Backfill rule:
+
+- If `submitted_date < 2026-01-01` but `updated_date >= 2026-01-01`, keep the paper in the candidate pool when it is relevant to ImageNet-256 flow/diffusion/DiT/SiT/pixel/latent/RAE/VAE generation.
+- Mark these records with `search_window = "updated_after_2026_backfill"` or a more specific manual/backfill window.
+- Do not exclude a strong paper only because its first arXiv submission predates 2026.
 
 For each candidate paper, collect:
 

@@ -20,8 +20,20 @@ First read:
 Search window:
 - Determine the last covered search date from the latest daily report.
 - Search from that date minus 7 days through today, so updated arXiv versions are not missed.
+- Search both:
+  - newly submitted papers in the window,
+  - older papers with updated/revised versions in the window.
+- Main automated scope starts from `2026-01-01` for newly submitted papers.
+- Important pre-2026 papers must still be included when they satisfy any of:
+  - updated/revised on or after `2026-01-01`,
+  - accepted to a 2026 venue,
+  - appears as a strong ImageNet-256 method in a newer paper's comparison table,
+  - user explicitly provides the paper,
+  - reports ImageNet-256 FID/gFID/FID-50k and is directly relevant to flow/diffusion/DiT/SiT/pixel/latent/RAE/VAE generation.
+- Do not treat pre-2026 as seed-only. Treat it as:
+  - seed baseline if copied from the RAE-DiT table,
+  - manual/backfill candidate if newly discovered or revised after `2026-01-01`.
 - Only add genuinely new records or changed versions.
-- Main scope starts from `2026-01-01`; pre-2026 data is seed/baseline data only.
 
 Search source:
 - Use arXiv as the primary source.
@@ -35,6 +47,7 @@ For every candidate paper:
 3. Append/update `data/papers-index.jsonl` without destroying existing data.
 4. Classify using `prompts/classify-paper-from-abstract.md`.
 5. Append classification to `data/classifications.jsonl`.
+6. If `submitted_date < 2026-01-01` but `updated_date >= 2026-01-01`, keep it in the pool and mark `search_window` as `updated_after_2026_backfill`.
 
 Promotion rule:
 Promote to full-paper extraction if:
@@ -86,6 +99,7 @@ Quality gates before final response:
 - Validate CSV parses and row count is correct.
 - Check no blank TL;DR values in accepted leaderboard rows.
 - Reload `http://localhost:8000/` and verify the table/chart reflects new rows.
+- Report any important paper excluded only because of submitted-date filtering.
 - Report blockers, rate limits, ambiguous papers, and policy decisions.
 
 Final response:

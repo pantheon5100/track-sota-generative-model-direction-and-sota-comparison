@@ -8,6 +8,8 @@ Search policy:
 
 - Pre-2026 data is seeded from the RAE-DiT paper and its ImageNet 256x256 comparison table.
 - Automated arXiv discovery should search papers submitted on or after 2026-01-01.
+- Automated arXiv discovery should also keep older papers whose arXiv versions were updated/revised on or after 2026-01-01 when they are relevant to ImageNet-256 flow/diffusion/DiT/SiT/pixel/latent/RAE/VAE generation.
+- Important pre-2026 papers are allowed as manual/backfill candidates when they report ImageNet-256 FID/gFID/FID-50k, are accepted to a 2026 venue, appear in newer comparison tables, or are explicitly provided by the user.
 - Papers about video, audio, language, 3D, robotics, medical, or other applications are off-scope unless they also report general image-generation results on ImageNet 256x256.
 
 ## Core Query Terms
@@ -64,7 +66,10 @@ Track these because papers increasingly report results for both DiT-based and Si
 - diffusion transformer XL
 - scalable interpolant transformer
 - latent diffusion transformer
+- PixelDiT
 - pixel diffusion transformer
+- pixel token compaction
+- pixel-wise AdaLN
 - representation autoencoder
 - RAE
 - VAE latent
@@ -141,4 +146,3 @@ Do not discard papers at query time only because they mention applications. Inst
 - the paper only evaluates non-ImageNet application data,
 - the paper is about recognition, segmentation, captioning, editing, inverse problems, or restoration without an ImageNet generation benchmark,
 - the paper uses flow/diffusion only as a component in a non-generative task.
-
